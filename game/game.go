@@ -7,3 +7,5 @@ func NewGame(cfg Configuration) (g *Game) {
 func (g *Game) Start() {}
 
 func (g *Game) Stop() {}
+
+func (g *Game) Update() {}
