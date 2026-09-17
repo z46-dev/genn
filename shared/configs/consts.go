@@ -9,23 +9,6 @@ const (
 )
 
 const (
-	GunStatKeyReload      GunStatKey = iota // Reload
-	GunStatKeyRecoil                        // Recoil
-	GunStatKeyShudder                       // Shudder
-	GunStatKeySize                          // Size
-	GunStatKeyHealth                        // Health
-	GunStatKeyDamage                        // Damage
-	GunStatKeyPenetration                   // Penetration
-	GunStatKeySpeed                         // Speed
-	GunStatKeyMaxSpeed                      // Max Speed
-	GuNStatKeyRange                         // Range
-	GunStatKeyDensity                       // Density
-	GunStatKeySpray                         // Angular randomness
-	GunStatKeyResist                        // Incoming damage resistance
-	GunStatKey_SENTINEL                     // Sentinel, for representing the "number" of gun stat keys
-)
-
-const (
 	GunCalcNameDefault GunCalcName = iota // Default, bullets
 	GunCalcNameDrone
 	GunCalcNameSwarm
@@ -36,8 +19,7 @@ const (
 )
 
 const (
-	FacingTypeDefault FacingType = iota // Default, no behavior
-	FacingTypeAutospin
+	FacingTypeAutospin FacingType = iota
 	FacingTypeTurnWithSpeed
 	FacingTypeTurnWithMotion
 	FacingTypeTurnWithTarget
@@ -47,11 +29,20 @@ const (
 )
 
 const (
-	MotionTypeDefault MotionType = iota // Default, no behavior
-	MotionTypeGlide
+	MotionTypeGlide MotionType = iota
 	MotionTypeMotor
 	MotionTypeSwarm
 	MotionTypeChase
 	MotionTypeDrift
 	MotionTypeBound
 )
+
+const (
+	UpgradeTier1 UpgradeTier = iota
+	UpgradeTier2
+	UpgradeTier3
+	UpgradeTier4
+	UpgradeTier_SENTINEL
+)
+
+var idCounter DefinitionID = 0
