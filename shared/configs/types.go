@@ -8,7 +8,13 @@ type (
 	GunCalcName  uint8
 	FacingType   uint8
 	MotionType   uint8
+	HitsOwnType  uint8
 	UpgradeTier  uint8
+
+	Shape struct {
+		Circle bool
+		Points []*vector.Vec2[float64]
+	}
 
 	GunStats struct {
 		Reload      float64
@@ -29,32 +35,39 @@ type (
 	BodyStats struct {
 		Health, Damage, Penetration, Shield, Regeneration *float64
 		Heterogeneity, Density, Pushability, Resist       *float64
-		Acceleration, Speed                               *float64
+		Acceleration, Speed, Range                        *float64
 		FOV                                               *float64
 	}
 
 	AISettings struct {
-		DirectAim             bool // Aim directly at the target's current position instead of leading shots.
-		IgnoreGunRange        bool // Use the entity's own movement/FOV for target acquisition instead of gun tracking.
-		OwnerVisionBound      bool // Only acquire targets that are also near the master/owner.
-		TargetAllDangerLevels bool // Allow lower-danger targets instead of filtering only to the highest danger tier.
-		FullView              bool // Ignore turret firing arcs while searching for targets.
-		IgnoreFood            bool // Do not target food/shapes.
-		RandomizeStrafe       bool // Occasionally reverse orbit/strafing direction around the master.
+		DirectAim             *bool // Aim directly at the target's current position instead of leading shots.
+		IgnoreGunRange        *bool // Use the entity's own movement/FOV for target acquisition instead of gun tracking.
+		OwnerVisionBound      *bool // Only acquire targets that are also near the master/owner.
+		TargetAllDangerLevels *bool // Allow lower-danger targets instead of filtering only to the highest danger tier.
+		FullView              *bool // Ignore turret firing arcs while searching for targets.
+		IgnoreFood            *bool // Do not target food/shapes.
+		RandomizeStrafe       *bool // Occasionally reverse orbit/strafing direction around the master.
 	}
 
 	Definition struct {
-		ID         DefinitionID
-		Type       *Type
-		Name       *string
-		Parents    []*Definition
-		Guns       []*Gun
-		Turrets    []*Turret
-		Upgrades   [UpgradeTier_SENTINEL][]*Definition
-		Body       *BodyStats
-		AI         *AISettings
-		MotionType *MotionType
-		FacingType *FacingType
+		Index                                                            *DefinitionID
+		Type                                                             *Type
+		Label, Name                                                      *string
+		Parents                                                          []*Definition
+		Guns                                                             []*Gun
+		Turrets                                                          []*Turret
+		Upgrades                                                         [UpgradeTier_SENTINEL][]*Definition
+		Body                                                             *BodyStats
+		AI                                                               *AISettings
+		MotionType                                                       *MotionType
+		FacingType                                                       *FacingType
+		Size, Danger, Value                                              *float64
+		GiveKillMessage, DrawHealth, AcceptsScore, CanGoOutsideRoom      *bool
+		PersistsAfterDeath, CanBeOnLeaderboard, DieAtRange, VariesInSize *bool
+		AdvancedDamage, RatioEffects, HealthWithLevel, Independent       *bool
+		Color, MaxChildren                                               *int
+		HitsOwnType                                                      *HitsOwnType
+		Shape                                                            *Shape
 	}
 
 	GunPosition struct { // Design of the gun
@@ -104,5 +117,9 @@ type (
 
 	BodyBuilder struct {
 		Body *BodyStats
+	}
+
+	AIBuilder struct {
+		AI *AISettings
 	}
 )

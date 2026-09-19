@@ -45,6 +45,7 @@ var (
 	// NPC Stats
 
 	// Balance Modifiers
+	gAuto = GunStats{Reload: 1.15, Recoil: 0.1, Shudder: 1, Size: 1, Health: 0.7, Damage: 0.8, Penetration: 1.25, Speed: 1.05, MaxSpeed: 1.05, Range: 0.98, Density: 1, Spray: 1.1, Resist: 1}
 )
 
 var base *BodyStats = NewBody().
