@@ -11,10 +11,11 @@ var Food *Definition = New().
 	FacingType(FacingTypeTurnWithSpeed).
 	VariesInSize(true).
 	Body(NewBody().Pushability(1).Build()).
-	AdvancedDamage(true).
+	AdvancedDamage(false).
 	RatioEffects(true).
 	HealthWithLevel(false).
 	DrawHealth(true).
+	NPCControllers(ControllerMoveInCircles).
 	Build()
 
 var Egg *Definition = New().

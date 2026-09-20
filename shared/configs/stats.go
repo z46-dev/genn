@@ -31,6 +31,7 @@ var (
 	// Core stats
 	gBasic = GunStats{Reload: 18, Recoil: 1.4, Shudder: 0.1, Size: 1, Health: 1, Damage: 0.75, Penetration: 1, Speed: 4.5, MaxSpeed: 1, Range: 1, Density: 1, Spray: 15, Resist: 1}
 	gDrone = GunStats{Reload: 50, Recoil: 0.25, Shudder: 0.1, Size: 0.6, Health: 1, Damage: 1, Penetration: 1, Speed: 2, MaxSpeed: 1, Range: 1, Density: 1, Spray: 0.1, Resist: 1}
+	gTrap  = GunStats{Reload: 36, Recoil: 1, Shudder: 0.25, Size: 0.6, Health: 1, Damage: 0.75, Penetration: 1, Speed: 5, MaxSpeed: 1, Range: 1, Density: 1, Spray: 15, Resist: 3}
 
 	// Tier 1 Stats
 	gTwin   = GunStats{Reload: 1, Recoil: 0.5, Shudder: 0.9, Size: 1, Health: 0.9, Damage: 0.7, Penetration: 1, Speed: 1, MaxSpeed: 1, Range: 1, Density: 1, Spray: 1.2, Resist: 1}
@@ -49,8 +50,16 @@ var (
 )
 
 var base *BodyStats = NewBody().
-	Health(20).Damage(3).Penetration(1.05).Shield(8).Regeneration(0.025).
-	Heterogeneity(3).Density(0.5).Pushability(0.9).Resist(1).
-	Acceleration(1.6).Speed(5.25).
+	Health(20).
+	Damage(3).
+	Penetration(1.05).
+	Shield(8).
+	Regeneration(0.025).
+	Heterogeneity(3).
+	Density(0.5).
+	Pushability(0.9).
+	Resist(1).
+	Acceleration(1.6).
+	Speed(5.25).
 	FOV(1).
 	Build()

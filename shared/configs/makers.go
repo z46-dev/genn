@@ -90,7 +90,7 @@ func makeAuto(def *Definition, opts *MakeAutoOptions) (out *Definition) {
 	builder.Label(*opts.name)
 	builder.Turret(
 		NewTurret(*opts.size, 0, 0, 180, 360, 1).
-			Definitions(opts.def, NewDummy().Independent(*opts.independent).Build()).
+			Definitions(opts.def, NewDummy().Independent(*opts.independent).Controllers(ControllerNearestDifferentMaster).Build()).
 			Build(),
 	)
 

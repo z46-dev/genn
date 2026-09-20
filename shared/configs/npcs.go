@@ -59,6 +59,9 @@ var Crasher *Definition = New().
 	FacingType(FacingTypeSmoothWithMotion).
 	HitsOwnType(HitsOwnTypeHard).
 	DrawHealth(true).
+	NPCControllers(ControllerNearestDifferentMaster, ControllerMapTargetToGoal).
+	HealthWithLevel(false).
+	AcceptsScore(true).
 	Build()
 
 // Sentries
@@ -79,6 +82,7 @@ var Sentry *Definition = New().
 			FOV(0.5).
 			Build(),
 	).
+	Skills(skillSetArrasToGenn(0.5, 0.8, 0.8, 0.1, 1, 0.5, 0, 0, 0.7, 0)).
 	Build()
 
 var SentryGun *Definition = makeAuto(Sentry, NewMakeAutoOptions().Name("Sentry"))

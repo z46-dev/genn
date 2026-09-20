@@ -35,5 +35,5 @@ func init() {
 	// Tank Upgrade Paths
 
 	//// Tier 0
-	setUpgrades(Basic, UpgradeTier1, Twin, Sniper, MachineGun, FlankGuard)
+	setUpgrades(Basic, UpgradeTier1, Twin, Sniper, MachineGun, FlankGuard, Director, Trapper)
 }

@@ -1,6 +1,9 @@
 package configs
 
-import "github.com/z46-dev/gamelib/vector"
+import (
+	"github.com/z46-dev/gamelib/vector"
+	"golang.org/x/exp/constraints"
+)
 
 type (
 	Type         uint8
@@ -10,6 +13,9 @@ type (
 	MotionType   uint8
 	HitsOwnType  uint8
 	UpgradeTier  uint8
+	Controller   uint8
+	StatNames    uint8
+	SkillCap     uint8
 
 	Shape struct {
 		Circle bool
@@ -31,6 +37,23 @@ type (
 		Spray       float64
 		Resist      float64
 	}
+
+	skill_like[T constraints.Integer | ~string] struct {
+		BodyDamage         T
+		MaxHealth          T
+		BulletSpeed        T
+		BulletHealth       T
+		BulletPenetration  T
+		BulletDamage       T
+		Reload             T
+		Speed              T
+		ShieldRegeneration T
+		ShieldCapacity     T
+	}
+
+	Skills     skill_like[int]
+	SkillCaps  skill_like[SkillCap]
+	SkillNames skill_like[string]
 
 	BodyStats struct {
 		Health, Damage, Penetration, Shield, Regeneration *float64
@@ -65,9 +88,14 @@ type (
 		GiveKillMessage, DrawHealth, AcceptsScore, CanGoOutsideRoom      *bool
 		PersistsAfterDeath, CanBeOnLeaderboard, DieAtRange, VariesInSize *bool
 		AdvancedDamage, RatioEffects, HealthWithLevel, Independent       *bool
+		ClearOnMasterUpgrade                                             *bool
 		Color, MaxChildren                                               *int
 		HitsOwnType                                                      *HitsOwnType
 		Shape                                                            *Shape
+		Controllers, NPCControllers                                      []Controller
+		StatNames                                                        *StatNames
+		Skills                                                           *Skills
+		SkillCaps                                                        *SkillCaps
 	}
 
 	GunPosition struct { // Design of the gun
@@ -83,6 +111,9 @@ type (
 		Shoots         *Definition
 		ShootSettings  GunStats
 		StatCalculator *GunCalcName
+		Autofire       bool
+		SyncSkills     bool
+		MaxChildren    *int
 	}
 
 	Gun struct {

@@ -220,6 +220,50 @@ func (b *DefBuilder) Independent(i bool) (self *DefBuilder) {
 	return
 }
 
+// Controllers ALWAYS applied
+func (b *DefBuilder) Controllers(c ...Controller) (self *DefBuilder) {
+	b.Definition.Controllers = append(b.Definition.Controllers, c...)
+	self = b
+	return
+}
+
+// Controllers optionally applied during spawning code
+func (b *DefBuilder) NPCControllers(c ...Controller) (self *DefBuilder) {
+	b.Definition.NPCControllers = append(b.Definition.NPCControllers, c...)
+	self = b
+	return
+}
+
+func (b *DefBuilder) ClearOnMasterUpgrade(c bool) (self *DefBuilder) {
+	b.Definition.ClearOnMasterUpgrade = &c
+	self = b
+	return
+}
+
+func (b *DefBuilder) StatNames(s StatNames) (self *DefBuilder) {
+	b.Definition.StatNames = &s
+	self = b
+	return
+}
+
+func (b *DefBuilder) MaxChildren(m int) (self *DefBuilder) {
+	b.Definition.MaxChildren = &m
+	self = b
+	return
+}
+
+func (b *DefBuilder) Skills(s Skills) (self *DefBuilder) {
+	b.Definition.Skills = &s
+	self = b
+	return
+}
+
+func (b *DefBuilder) SkillCaps(s SkillCaps) (self *DefBuilder) {
+	b.Definition.SkillCaps = &s
+	self = b
+	return
+}
+
 func (b *DefBuilder) Build() (out *Definition) {
 	out = b.Definition
 	return
@@ -262,6 +306,24 @@ func (b *GunBuilder) Shoots(stats GunStats, shoots *Definition) (self *GunBuilde
 
 func (b *GunBuilder) StatCalculator(calc GunCalcName) (self *GunBuilder) {
 	b.Gun.Properties.StatCalculator = &calc
+	self = b
+	return
+}
+
+func (b *GunBuilder) Autofire(a bool) (self *GunBuilder) {
+	b.Gun.Properties.Autofire = a
+	self = b
+	return
+}
+
+func (b *GunBuilder) SyncSkills(s bool) (self *GunBuilder) {
+	b.Gun.Properties.SyncSkills = s
+	self = b
+	return
+}
+
+func (b *GunBuilder) MaxChildren(m int) (self *GunBuilder) {
+	b.Gun.Properties.MaxChildren = &m
 	self = b
 	return
 }
