@@ -20,10 +20,11 @@ const (
 	GunCalcNameDefault GunCalcName = iota // Default, bullets
 	GunCalcNameDrone
 	GunCalcNameSwarm
-	GunCalcNameTrap
 	GunCalcNameFixedReload
 	GunCalcNameThruster
 	GunCalcNameSustained
+	GunCalcNameNecro
+	GunCalcNameTrap
 )
 
 const (
