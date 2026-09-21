@@ -11,6 +11,7 @@ type (
 	Configuration struct{}
 
 	Game struct {
+		Time                  float64
 		EntitiesIDAccumulator uint64
 		Entities              *gamelib.Collection[*Entity]
 		HSHG                  *hshg.SpatialHash2[*Entity, float64]

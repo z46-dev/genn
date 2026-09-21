@@ -2,7 +2,9 @@ package game
 
 import (
 	"math"
+	"math/rand/v2"
 
+	"github.com/z46-dev/gamelib/vector"
 	"github.com/z46-dev/genn/shared/configs"
 )
 
@@ -89,8 +91,7 @@ func (g *Gun) Update() {
 	// Firing Routines
 	if permission && (g.Autofire || wantsToShoot) {
 		if g.Cycle >= 1 {
-			// var gx, gy float64 = 0, 0
-			// g.Fire(gx, gy)
+			g.Fire()
 			g.Cycle--
 		}
 	} else {
@@ -104,4 +105,50 @@ func (g *Gun) Update() {
 
 		g.Cycle = min(g.Cycle, cycleDelay)
 	}
+}
+
+func (g *Gun) Fire() {
+	if !g.CanShoot {
+		return
+	}
+}
+
+func (g *Gun) SyncChildren() {}
+
+func (g *Gun) Interpret() {
+	var (
+		sk                         *Skill                = g.Body.Skill
+		shudder, spray             float64               = (rand.Float64() + rand.Float64() - 1) * g.Settings.Shudder * 2, (rand.Float64() + rand.Float64() - 1) * g.Settings.Spray / 2 * math.Pi / 180
+		realSpeedScalar, realAngle float64               = runSpeed * g.Settings.Speed * sk.BulletSpeed * (1 + shudder), g.Body.Facing + g.Angle + spray
+		speed                      *vector.Vec2[float64] = vector.NewVec2(math.Cos(realAngle)*realSpeedScalar, math.Sin(realAngle)*realSpeedScalar)
+	)
+
+	g.LastShot.Time = g.Body.Game.Time
+	g.LastShot.Power = 3 * math.Log(math.Sqrt(sk.BulletSpeed)+g.TrueRecoil+1)
+	g.AnimMotion += g.LastShot.Power
+
+	// Apply boost if we should
+	if speed.SquaredLength() != 0 && g.Body.Velocity.SquaredLength() != 0 {
+		var (
+			bullLen, bodyLen float64 = speed.Length(), g.Body.Velocity.Length()
+			extraBoost       float64 = max(0, speed.X*g.Body.Velocity.X+speed.Y*g.Body.Velocity.Y) / bullLen / bodyLen
+		)
+
+		if extraBoost > 0 {
+			speed.X += bodyLen * extraBoost * speed.X / bullLen
+			speed.Y += bodyLen * extraBoost * speed.Y / bullLen
+		}
+	}
+
+	var (
+		offset, direction float64 = g.Offset.Length(), g.Offset.Direction()
+		gpAngle, gAngle   float64 = g.Body.Facing + g.Angle + direction, g.Body.Facing + g.Angle
+		sizeTuner         float64 = 1.5*g.Length - g.BaseWidth*g.Settings.Size/2
+		gx, gy            float64 = offset*math.Cos(gpAngle) + sizeTuner*math.Cos(gAngle), offset*math.Sin(gpAngle) + sizeTuner*math.Sin(gAngle)
+	)
+
+	// Create the bullet
+	/*var o *Entity =*/
+	NewEntity(g.Body.Game, vector.NewVec2(g.Body.Position.X+g.Body.Size*gx-speed.X, g.Body.Position.Y+g.Body.Size*gy-speed.Y), g.Master.Master)
+
 }
