@@ -16,6 +16,7 @@ type (
 	Controller   uint8
 	StatNames    uint8
 	SkillCap     uint8
+	DamageClass  uint8
 
 	Shape struct {
 		Circle bool
@@ -96,6 +97,7 @@ type (
 		StatNames                                                        *StatNames
 		Skills                                                           *Skills
 		SkillCaps                                                        *SkillCaps
+		DamageClass                                                      *DamageClass
 	}
 
 	GunPosition struct { // Design of the gun

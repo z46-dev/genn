@@ -19,6 +19,7 @@ var Obstacle *Definition = New().
 	Size(60).
 	Color(16).
 	VariesInSize(true).
+	DamageClass(DamageClassObstacles).
 	Build()
 
 var BabyObstacle *Definition = New().

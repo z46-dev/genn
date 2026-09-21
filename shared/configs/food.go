@@ -16,6 +16,7 @@ var Food *Definition = New().
 	HealthWithLevel(false).
 	DrawHealth(true).
 	NPCControllers(ControllerMoveInCircles).
+	DamageClass(DamageClassFood).
 	Build()
 
 var Egg *Definition = New().

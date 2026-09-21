@@ -191,3 +191,10 @@ const (
 	SkillCapNormal  SkillCap = 9
 	SkillCapSmasher SkillCap = 12
 )
+
+const (
+	DamageClassDefault DamageClass = iota
+	DamageClassFood
+	DamageClassTanks
+	DamageClassObstacles
+)

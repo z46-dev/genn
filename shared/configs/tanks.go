@@ -14,6 +14,7 @@ var GenericTank *Definition = New().
 	PersistsAfterDeath(false).
 	CanBeOnLeaderboard(true).
 	SkillCaps(SkillCaps{SkillCapNormal, SkillCapNormal, SkillCapNormal, SkillCapNormal, SkillCapNormal, SkillCapNormal, SkillCapNormal, SkillCapNormal, SkillCapNormal, SkillCapNormal}).
+	DamageClass(DamageClassTanks).
 	Build()
 
 // Tier 0 (Danger = 4)

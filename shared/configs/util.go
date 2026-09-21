@@ -24,12 +24,12 @@ func skillSetArrasToGenn(rld, dam, pen, str, spd, atk, hlt, shi, rgn, mob float6
 	}
 
 	out = Skills{
-		BodyDamage:         convert(dam),
+		BodyDamage:         convert(atk),
 		MaxHealth:          convert(hlt),
 		BulletSpeed:        convert(spd),
 		BulletHealth:       convert(str),
 		BulletPenetration:  convert(pen),
-		BulletDamage:       convert(atk),
+		BulletDamage:       convert(dam),
 		Reload:             convert(rld),
 		Speed:              convert(mob),
 		ShieldRegeneration: convert(rgn),

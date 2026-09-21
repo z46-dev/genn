@@ -264,6 +264,12 @@ func (b *DefBuilder) SkillCaps(s SkillCaps) (self *DefBuilder) {
 	return
 }
 
+func (b *DefBuilder) DamageClass(d DamageClass) (self *DefBuilder) {
+	b.Definition.DamageClass = &d
+	self = b
+	return
+}
+
 func (b *DefBuilder) Build() (out *Definition) {
 	out = b.Definition
 	return
