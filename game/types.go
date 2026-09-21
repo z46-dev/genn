@@ -40,9 +40,16 @@ type (
 		CanUpgrade                   bool
 	}
 
+	// The parent of an entity can be either a gun or another Entity, but it has children.
+	Parent struct {
+		IsGun  bool
+		Entity *Entity
+		Gun    *Gun
+	}
+
 	Gun struct {
 		Body, Master                             *Entity
-		Children                                 []*Entity
+		Children                                 map[uint64]*Entity
 		CanShoot, Autofire, WaitToCycle, AltFire bool
 		Length, BaseWidth, EndWidth              float64
 		Offset                                   *vector.Vec2[float64]
@@ -68,7 +75,8 @@ type (
 		ID                         uint64
 		Game                       *Game
 		Index                      configs.DefinitionID
-		Master, Source, Parent     *Entity
+		Master, Source             *Entity
+		Parent                     *Parent
 		Position, Velocity, DeltaV *vector.Vec2[float64]
 		AABB                       *hshg.AABB2[float64]
 		Size, Facing               float64
@@ -77,9 +85,11 @@ type (
 		Health, Shield             *HealthType
 		Skill                      *Skill
 		Invulnerable               bool
-		Children                   []*Entity
+		Children                   map[uint64]*Entity
 		MaxChildren                int
 		Control                    *Control
+		Label                      string
+		Color                      int
 	}
 
 	Client struct{}

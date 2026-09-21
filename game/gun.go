@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"math"
 	"math/rand/v2"
 
@@ -111,11 +112,7 @@ func (g *Gun) Fire() {
 	if !g.CanShoot {
 		return
 	}
-}
 
-func (g *Gun) SyncChildren() {}
-
-func (g *Gun) Interpret() {
 	var (
 		sk                         *Skill                = g.Body.Skill
 		shudder, spray             float64               = (rand.Float64() + rand.Float64() - 1) * g.Settings.Shudder * 2, (rand.Float64() + rand.Float64() - 1) * g.Settings.Spray / 2 * math.Pi / 180
@@ -148,7 +145,54 @@ func (g *Gun) Interpret() {
 	)
 
 	// Create the bullet
-	/*var o *Entity =*/
-	NewEntity(g.Body.Game, vector.NewVec2(g.Body.Position.X+g.Body.Size*gx-speed.X, g.Body.Position.Y+g.Body.Size*gy-speed.Y), g.Master.Master)
+	var o *Entity = NewEntity(g.Body.Game, vector.NewVec2(g.Body.Position.X+g.Body.Size*gx-speed.X, g.Body.Position.Y+g.Body.Size*gy-speed.Y), g.Master.Master)
+	o.Velocity.X = speed.X
+	o.Velocity.Y = speed.Y
+	g.BulletInit(o)
+}
 
+func (g *Gun) BulletInit(o *Entity) {
+	// Define it by its natural properties
+	for _, def := range g.BulletTypes {
+		o.Define(def)
+	}
+
+	// Pass the gun attributes
+	o.Define(&configs.Definition{
+		Body:   g.Interpret(),
+		Skills: g.GetSkillRaw(),
+		Size:   ptr(g.Body.Size * g.BaseWidth * g.Settings.Size / 2),
+		Label:  ptr(fmt.Sprintf("%s %s", g.Master.Label, o.Label)),
+	})
+
+	o.Color = g.Body.Master.Color
+
+	if g.MaxChildren > 0 {
+		o.Parent = gParent(g)
+		g.Children[o.ID] = o
+	} else if g.Body.MaxChildren > 0 {
+		o.Parent = eParent(g.Body)
+		g.Body.Children[o.ID] = o
+	}
+
+	o.Source = g.Body
+	o.Facing = o.Velocity.Direction()
+
+	// o.RefreshBodyAttributes()
+	// o.Life()
+}
+
+func (g *Gun) SyncChildren() {}
+
+func (g *Gun) Interpret() (b *configs.BodyStats) {
+	// var (
+		// body *configs.BodyBuilder = configs.NewBody()
+		// sizeFactor float64 = g1
+	// )
+
+	return
+}
+
+func (g *Gun) GetSkillRaw() (s *configs.Skills) {
+	return
 }
