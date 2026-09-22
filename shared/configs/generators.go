@@ -2,6 +2,7 @@ package configs
 
 import (
 	"math"
+	"reflect"
 
 	"github.com/z46-dev/gamelib/vector"
 )
@@ -290,7 +291,9 @@ func NewGun(length, baseWidth, endWidth, x, y, angle, delay float64) (b *GunBuil
 				Angle:     angle,
 				Delay:     delay,
 			},
-			Properties: &GunProperties{},
+			Properties: &GunProperties{
+				StatCalculator: GunCalcNameDefault,
+			},
 		},
 	}
 
@@ -303,7 +306,7 @@ func (b *GunBuilder) Position(p *GunPosition) (self *GunBuilder) {
 	return
 }
 
-func (b *GunBuilder) Shoots(stats GunStats, shoots *Definition) (self *GunBuilder) {
+func (b *GunBuilder) Shoots(stats GunStats, shoots ...*Definition) (self *GunBuilder) {
 	b.Gun.Properties.ShootSettings = stats
 	b.Gun.Properties.Shoots = shoots
 	self = b
@@ -311,7 +314,7 @@ func (b *GunBuilder) Shoots(stats GunStats, shoots *Definition) (self *GunBuilde
 }
 
 func (b *GunBuilder) StatCalculator(calc GunCalcName) (self *GunBuilder) {
-	b.Gun.Properties.StatCalculator = &calc
+	b.Gun.Properties.StatCalculator = calc
 	self = b
 	return
 }
@@ -329,8 +332,20 @@ func (b *GunBuilder) SyncSkills(s bool) (self *GunBuilder) {
 }
 
 func (b *GunBuilder) MaxChildren(m int) (self *GunBuilder) {
-	b.Gun.Properties.MaxChildren = &m
+	b.Gun.Properties.MaxChildren = m
 	self = b
+	return
+}
+
+func (g *GunBuilder) WaitToCycle(w bool) (self *GunBuilder) {
+	g.Gun.Properties.WaitToCycle = w
+	self = g
+	return
+}
+
+func (g *GunBuilder) AltFire(a bool) (self *GunBuilder) {
+	g.Gun.Properties.AltFire = a
+	self = g
 	return
 }
 
@@ -468,6 +483,46 @@ func (b *BodyBuilder) FOV(f float64) (self *BodyBuilder) {
 
 func (b *BodyBuilder) Build() (out *BodyStats) {
 	out = b.Body
+	return
+}
+
+// For each non-nil property in other, overwrite the corresponding property in b.Body.
+func (b *BodyBuilder) OverwriteWith(other *BodyStats) (self *BodyBuilder) {
+	var t reflect.Type = reflect.TypeFor[BodyStats]()
+
+	for field := range t.Fields() {
+		var (
+			fieldName  string        = field.Name
+			fieldValue reflect.Value = reflect.ValueOf(other).Elem().FieldByName(fieldName)
+		)
+
+		if !fieldValue.IsNil() {
+			reflect.ValueOf(b.Body).Elem().FieldByName(fieldName).Set(fieldValue)
+		}
+	}
+
+	self = b
+	return
+}
+
+// For each non-nil property in b.Body, if the corresponding property in other is nil,
+// multiply the property in b.Body by the property in other.
+func (b *BodyBuilder) MultiplyInto(other *BodyStats) (self *BodyBuilder) {
+	var t reflect.Type = reflect.TypeFor[BodyStats]()
+
+	for field := range t.Fields() {
+		var (
+			fieldName              string        = field.Name
+			fieldValue, otherValue reflect.Value = reflect.ValueOf(b.Body).Elem().FieldByName(fieldName), reflect.ValueOf(other).Elem().FieldByName(fieldName)
+		)
+
+		if !fieldValue.IsNil() && otherValue.IsNil() {
+			var newValue float64 = fieldValue.Elem().Float() * otherValue.Elem().Float()
+			reflect.ValueOf(other).Elem().FieldByName(fieldName).Set(reflect.ValueOf(&newValue))
+		}
+	}
+
+	self = b
 	return
 }
 

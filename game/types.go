@@ -34,6 +34,7 @@ type (
 		MovementSpeed                float64
 		ShieldRegeneration           float64
 		ShieldCapacity               float64
+		BodyResist, BulletResist     float64
 		Ghost                        float64
 		Level, Points                int
 		LevelScore, Score, Deduction float64
@@ -60,6 +61,8 @@ type (
 		Calculator                               configs.GunCalcName
 		Settings                                 configs.GunStats
 		MaxChildren                              int
+		Natural                                  *configs.BodyStats
+		SyncSkills                               bool
 		LastShot                                 struct {
 			Time, Power float64
 		}

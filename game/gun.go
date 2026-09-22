@@ -9,9 +9,44 @@ import (
 	"github.com/z46-dev/genn/shared/configs"
 )
 
-func NewGun() (g *Gun) {
+func NewGun(body *Entity, info *configs.Gun) (g *Gun) {
+	g = &Gun{
+		Body:     body,
+		Master:   body.Source,
+		Children: make(map[uint64]*Entity),
+		CanShoot: info.Properties != nil && len(info.Properties.Shoots) > 0,
+	}
+
+	if g.CanShoot {
+		g.Settings = info.Properties.ShootSettings
+		g.BulletTypes = info.Properties.Shoots
+		g.Autofire = info.Properties.Autofire
+		g.AltFire = info.Properties.AltFire
+		g.Calculator = info.Properties.StatCalculator
+		g.WaitToCycle = info.Properties.WaitToCycle
+		g.MaxChildren = info.Properties.MaxChildren
+		g.SyncSkills = info.Properties.SyncSkills
+
+		var natural *configs.BodyBuilder = configs.NewBody()
+		for _, def := range g.BulletTypes {
+			if def.Body != nil {
+				natural.OverwriteWith(def.Body)
+			}
+		}
+
+		g.Natural = natural.Build()
+	}
+
+	g.Length = info.Position.Length / 10
+	g.BaseWidth = info.Position.BaseWidth / 10
+	g.EndWidth = info.Position.EndWidth / 10
+	g.Offset = vector.NewVec2(info.Position.Offset.X/10, info.Position.Offset.Y/10)
+	g.Angle = info.Position.Angle * math.Pi / 180
+	g.Delay = info.Position.Delay
+
 	return
 }
+
 func (g *Gun) Update() {
 	if !g.CanShoot {
 		return
@@ -185,11 +220,45 @@ func (g *Gun) BulletInit(o *Entity) {
 func (g *Gun) SyncChildren() {}
 
 func (g *Gun) Interpret() (b *configs.BodyStats) {
-	// var (
-		// body *configs.BodyBuilder = configs.NewBody()
-		// sizeFactor float64 = g1
-	// )
+	var (
+		body       *configs.BodyBuilder = configs.NewBody()
+		sizeFactor float64              = 1
+		sk         *Skill               = g.Body.Skill
+	)
 
+	body.
+		Speed(g.Settings.MaxSpeed * sk.BulletSpeed).
+		Health(g.Settings.Health * sk.BulletHealth).
+		Resist(g.Settings.Resist * sk.BulletResist).
+		Damage(g.Settings.Damage * sk.BulletDamage).
+		Penetration(max(1, g.Settings.Penetration*sk.BulletPenetration)).
+		Range(g.Settings.Range / math.Sqrt(sk.BulletSpeed)).
+		Density(g.Settings.Density * sk.BulletPenetration * sk.BulletPenetration / sizeFactor).
+		Pushability(1 / sk.BulletPenetration).
+		Heterogeneity(3 - 2.8*sk.Ghost)
+
+	// Special calculations for certain gun types
+	switch g.Calculator {
+	case configs.GunCalcNameThruster:
+		g.TrueRecoil = g.Settings.Recoil * math.Sqrt(sk.Reload*sk.BulletSpeed)
+	case configs.GunCalcNameSustained:
+		body.Range(g.Settings.Range)
+	case configs.GunCalcNameSwarm:
+		body.Penetration(max(1, g.Settings.Penetration*(0.5*(sk.BulletPenetration-1)+1)))
+		body.Health(*body.Body.Health / math.Pow(sk.BulletPenetration, 0.5))
+	case configs.GunCalcNameTrap:
+		body.Pushability(1 / math.Pow(sk.BulletPenetration, 0.5))
+		body.Range(g.Settings.Range)
+	case configs.GunCalcNameDrone, configs.GunCalcNameNecro:
+		body.Pushability(1)
+		body.Penetration(max(1, g.Settings.Penetration*(0.5*(sk.BulletPenetration-1)+1)))
+		body.Health((g.Settings.Health*sk.BulletHealth + sizeFactor) / math.Pow(sk.BulletPenetration, 0.8))
+		body.Damage(g.Settings.Damage * sk.BulletDamage * math.Sqrt(sizeFactor) * g.Settings.Penetration * sk.BulletPenetration)
+		body.Range(g.Settings.Range * math.Sqrt(sizeFactor))
+	}
+
+	// Respect the natural properties of the bullet
+	body.MultiplyInto(g.Natural)
 	return
 }
 

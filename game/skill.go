@@ -97,6 +97,8 @@ func (sk *Skill) applyAttributes(attrib [SKILLS_LENGTH]float64) {
 	sk.ShieldRegeneration = skillApply(25, attrib[SkcnvShieldRegeneration])
 	sk.ShieldCapacity = skillApply(3, attrib[SkcnvShieldCapacity])
 	sk.Ghost = attrib[SkcnvBulletPenetration]
+	sk.BulletResist = 0.5*attrib[SkcnvBulletHealth] + 2.5*attrib[SkcnvBulletPenetration]
+	sk.BodyResist = 0.3 * (0.5*attrib[SkcnvBodyDamage] + 0.5*attrib[SkcnvMaxHealth] + attrib[SkcnvShieldRegeneration])
 }
 
 // Maintain updates skill progression over time.

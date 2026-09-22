@@ -110,12 +110,14 @@ type (
 	}
 
 	GunProperties struct { // Extra properties, includes weapon types/stats, color/skin, behavior
-		Shoots         *Definition
+		Shoots         []*Definition
 		ShootSettings  GunStats
-		StatCalculator *GunCalcName
+		StatCalculator GunCalcName
 		Autofire       bool
 		SyncSkills     bool
-		MaxChildren    *int
+		WaitToCycle    bool
+		AltFire        bool
+		MaxChildren    int
 	}
 
 	Gun struct {
