@@ -8,7 +8,8 @@ import (
 )
 
 type (
-	Configuration struct{}
+	ControllerSetFlags uint8
+	Configuration      struct{}
 
 	Game struct {
 		Time                  float64
@@ -72,10 +73,16 @@ type (
 		Target, Goal    *vector.Vec2[float64]
 		Main, Alt, Fire bool
 		Power           float64
+		SetFlags        ControllerSetFlags
+	}
+
+	IOController interface {
+		Think() (faucet *Control)
 	}
 
 	Entity struct {
 		ID                         uint64
+		CreationTime               float64
 		Game                       *Game
 		Index                      configs.DefinitionID
 		Master, Source             *Entity
@@ -84,6 +91,7 @@ type (
 		AABB                       *hshg.AABB2[float64]
 		Size, Facing               float64
 		Guns                       []*Gun
+		Turrets                    []*Entity
 		ActivationTime             float64
 		Health, Shield             *HealthType
 		Skill                      *Skill
@@ -93,7 +101,25 @@ type (
 		Control                    *Control
 		Label                      string
 		Color                      int
+		Controllers                []*IOController
+		Team                       int
+		KillCount                  struct{ Solo, Assists, Bosses int }
 	}
 
 	Client struct{}
+
+	IO_Base struct {
+		Body           *Entity
+		AcceptsFromTop bool
+	}
+
+	IO_doNothing struct {
+		IO_Base
+	}
+
+	IO_moveInCircles struct {
+		IO_Base
+		timer float64
+		goal  *vector.Vec2[float64]
+	}
 )

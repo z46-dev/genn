@@ -223,14 +223,22 @@ func (b *DefBuilder) Independent(i bool) (self *DefBuilder) {
 
 // Controllers ALWAYS applied
 func (b *DefBuilder) Controllers(c ...Controller) (self *DefBuilder) {
-	b.Definition.Controllers = append(b.Definition.Controllers, c...)
+	if b.Definition.Controllers == nil {
+		b.Definition.Controllers = &[]Controller{}
+	}
+
+	*b.Definition.Controllers = append(*b.Definition.Controllers, c...)
 	self = b
 	return
 }
 
 // Controllers optionally applied during spawning code
 func (b *DefBuilder) NPCControllers(c ...Controller) (self *DefBuilder) {
-	b.Definition.NPCControllers = append(b.Definition.NPCControllers, c...)
+	if b.Definition.NPCControllers == nil {
+		b.Definition.NPCControllers = &[]Controller{}
+	}
+
+	*b.Definition.NPCControllers = append(*b.Definition.NPCControllers, c...)
 	self = b
 	return
 }

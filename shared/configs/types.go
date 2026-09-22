@@ -93,7 +93,7 @@ type (
 		Color, MaxChildren                                               *int
 		HitsOwnType                                                      *HitsOwnType
 		Shape                                                            *Shape
-		Controllers, NPCControllers                                      []Controller
+		Controllers, NPCControllers                                      *[]Controller
 		StatNames                                                        *StatNames
 		Skills                                                           *Skills
 		SkillCaps                                                        *SkillCaps

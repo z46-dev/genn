@@ -213,11 +213,27 @@ func (g *Gun) BulletInit(o *Entity) {
 	o.Source = g.Body
 	o.Facing = o.Velocity.Direction()
 
-	// o.RefreshBodyAttributes()
-	// o.Life()
+	o.RefreshBodyAttributes()
+	o.Life()
 }
 
-func (g *Gun) SyncChildren() {}
+func (g *Gun) SyncChildren() {
+	if !g.SyncSkills {
+		return
+	}
+
+	var (
+		interpret *configs.BodyStats = g.Interpret()
+		skillRaw  *configs.Skills    = g.GetSkillRaw()
+	)
+
+	for _, child := range g.Children {
+		child.Define(&configs.Definition{
+			Body:   interpret,
+			Skills: skillRaw,
+		})
+	}
+}
 
 func (g *Gun) Interpret() (b *configs.BodyStats) {
 	var (
@@ -263,5 +279,13 @@ func (g *Gun) Interpret() (b *configs.BodyStats) {
 }
 
 func (g *Gun) GetSkillRaw() (s *configs.Skills) {
+	s = &configs.Skills{
+		BulletSpeed:       g.Body.Skill.Raw[SkcnvBulletSpeed],
+		BulletHealth:      g.Body.Skill.Raw[SkcnvBulletHealth],
+		BulletPenetration: g.Body.Skill.Raw[SkcnvBulletPenetration],
+		BulletDamage:      g.Body.Skill.Raw[SkcnvBulletDamage],
+		Reload:            g.Body.Skill.Raw[SkcnvReload],
+	}
+
 	return
 }
