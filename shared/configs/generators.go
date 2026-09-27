@@ -17,7 +17,7 @@ func New() (b *DefBuilder) {
 	b = &DefBuilder{
 		Definition: &Definition{
 			Index:    &nowID,
-			Upgrades: [UpgradeTier_SENTINEL][]*Definition{},
+			Upgrades: [UpgradeTier_SENTINEL]*[]*Definition{},
 		},
 	}
 
@@ -28,7 +28,7 @@ func New() (b *DefBuilder) {
 func NewDummy() (b *DefBuilder) {
 	b = &DefBuilder{
 		Definition: &Definition{
-			Upgrades: [UpgradeTier_SENTINEL][]*Definition{},
+			Upgrades: [UpgradeTier_SENTINEL]*[]*Definition{},
 		},
 	}
 
@@ -60,19 +60,19 @@ func (b *DefBuilder) Parent(p ...*Definition) (self *DefBuilder) {
 }
 
 func (b *DefBuilder) Gun(g ...*Gun) (self *DefBuilder) {
-	b.Definition.Guns = append(b.Definition.Guns, g...)
+	b.Definition.Guns = &g
 	self = b
 	return
 }
 
 func (b *DefBuilder) Turret(t ...*Turret) (self *DefBuilder) {
-	b.Definition.Turrets = append(b.Definition.Turrets, t...)
+	b.Definition.Turrets = &t
 	self = b
 	return
 }
 
 func (b *DefBuilder) Upgrade(t UpgradeTier, d ...*Definition) (self *DefBuilder) {
-	b.Definition.Upgrades[t] = append(b.Definition.Upgrades[t], d...)
+	b.Definition.Upgrades[t] = &d
 	self = b
 	return
 }

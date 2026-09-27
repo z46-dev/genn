@@ -1,6 +1,7 @@
 package game
 
 import (
+	"github.com/z46-dev/gamelib/poly"
 	"github.com/z46-dev/gamelib/vector"
 	"github.com/z46-dev/genn/shared/configs"
 )
@@ -86,7 +87,11 @@ func (e *Entity) Define(def *configs.Definition) {
 	}
 
 	if def.Shape != nil {
-		e.Shape = *def.Shape
+		if def.Shape.Circle {
+			e.Shape = nil
+		} else {
+			e.Shape = poly.NewPolygon(def.Shape.Points, e.Position, e.Size, e.Facing)
+		}
 	}
 
 	if def.Color != nil {
@@ -94,8 +99,10 @@ func (e *Entity) Define(def *configs.Definition) {
 	}
 
 	if def.Controllers != nil {
-		
+		// TODO
 	}
+
+	
 }
 
 // Update guns/turrets, apply forces, etc.

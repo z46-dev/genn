@@ -2,10 +2,10 @@ package configs
 
 func setUpgrades(target *Definition, tier UpgradeTier, upgrades ...*Definition) {
 	if target.Upgrades[tier] == nil {
-		target.Upgrades[tier] = []*Definition{}
+		target.Upgrades[tier] = &[]*Definition{}
 	}
 
-	target.Upgrades[tier] = append(target.Upgrades[tier], upgrades...)
+	*target.Upgrades[tier] = append(*target.Upgrades[tier], upgrades...)
 }
 
 func init() {

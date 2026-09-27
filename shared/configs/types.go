@@ -78,9 +78,9 @@ type (
 		Type                                                             *Type
 		Label, Name                                                      *string
 		Parents                                                          []*Definition
-		Guns                                                             []*Gun
-		Turrets                                                          []*Turret
-		Upgrades                                                         [UpgradeTier_SENTINEL][]*Definition
+		Guns                                                             *[]*Gun
+		Turrets                                                          *[]*Turret
+		Upgrades                                                         [UpgradeTier_SENTINEL]*[]*Definition
 		Body                                                             *BodyStats
 		AI                                                               *AISettings
 		MotionType                                                       *MotionType

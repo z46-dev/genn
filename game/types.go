@@ -3,6 +3,7 @@ package game
 import (
 	"github.com/z46-dev/gamelib"
 	"github.com/z46-dev/gamelib/hshg"
+	"github.com/z46-dev/gamelib/poly"
 	"github.com/z46-dev/gamelib/vector"
 	"github.com/z46-dev/genn/shared/configs"
 )
@@ -103,6 +104,9 @@ type (
 		Color                      int
 		Controllers                []*IOController
 		Team                       int
+		Name                       string
+		Type                       configs.Type
+		Shape                      *poly.Polygon[float64]
 		KillCount                  struct{ Solo, Assists, Bosses int }
 	}
 
