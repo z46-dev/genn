@@ -16,7 +16,7 @@ type (
 		Time                  float64
 		EntitiesIDAccumulator uint64
 		Entities              *gamelib.Collection[*Entity]
-		HSHG                  *hshg.SpatialHash2[*Entity, float64]
+		Collider, Viewer      *hshg.SpatialHash2[*Entity, float64]
 	}
 
 	HealthType struct {
@@ -81,33 +81,46 @@ type (
 		Think() (faucet *Control)
 	}
 
+	EntityBound struct {
+		Size   float64
+		Angle  float64
+		Offset *vector.Vec2[float64]
+		Arc    float64
+	}
+
 	Entity struct {
-		ID                         uint64
-		CreationTime               float64
-		Game                       *Game
-		Index                      configs.DefinitionID
-		Master, Source             *Entity
-		Parent                     *Parent
-		Position, Velocity, DeltaV *vector.Vec2[float64]
-		AABB                       *hshg.AABB2[float64]
-		Size, Facing               float64
-		Guns                       []*Gun
-		Turrets                    []*Entity
-		ActivationTime             float64
-		Health, Shield             *HealthType
-		Skill                      *Skill
-		Invulnerable               bool
-		Children                   map[uint64]*Entity
-		MaxChildren                int
-		Control                    *Control
-		Label                      string
-		Color                      int
-		Controllers                []*IOController
-		Team                       int
-		Name                       string
-		Type                       configs.Type
-		Shape                      *poly.Polygon[float64]
-		KillCount                  struct{ Solo, Assists, Bosses int }
+		ID                                            uint64
+		CreationTime                                  float64
+		Game                                          *Game
+		Index                                         configs.DefinitionID
+		Master, Source, Bond                          *Entity
+		Parent                                        *Parent
+		Position, Velocity, DeltaV                    *vector.Vec2[float64]
+		AABB                                          *hshg.AABB2[float64]
+		Size, Facing                                  float64
+		Speed, Acceleration, MaxSpeed, TopSpeed, Damp float64
+		Guns                                          []*Gun
+		Turrets                                       []*Entity
+		ActivationTime                                float64
+		Health, Shield                                *HealthType
+		Skill                                         *Skill
+		Invulnerable, MayCollide, Ghost               bool
+		Children                                      map[uint64]*Entity
+		MaxChildren                                   int
+		Control                                       *Control
+		Label                                         string
+		Color                                         int
+		Controllers                                   []*IOController
+		Team                                          int
+		Name                                          string
+		Type                                          configs.Type
+		Shape                                         *poly.Polygon[float64]
+		Bound                                         *EntityBound
+		FacingType                                    configs.FacingType
+		MotionType                                    configs.MotionType
+		Range                                         float64
+		KillCount                                     struct{ Solo, Assists, Bosses int }
+		FiringArc                                     struct{ Start, Width float64 }
 	}
 
 	Client struct{}
