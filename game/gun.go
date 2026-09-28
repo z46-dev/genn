@@ -13,7 +13,6 @@ func NewGun(body *Entity, info *configs.Gun) (g *Gun) {
 	g = &Gun{
 		Body:     body,
 		Master:   body.Source,
-		Children: make(map[uint64]*Entity),
 		CanShoot: info.Properties != nil && len(info.Properties.Shoots) > 0,
 	}
 
@@ -69,7 +68,7 @@ func (g *Gun) Update() {
 	}
 
 	// Recoil force
-	if g.AnimMotion > 0 {
+	if g.AnimMotion > 0 && !g.Body.Settings.HasNoRecoil {
 		var force float64 = -g.AnimPos * g.Settings.Recoil * 0.045
 		g.Body.DeltaV.X += math.Cos(g.Body.Facing+g.Angle) * force
 		g.Body.DeltaV.Y += math.Sin(g.Body.Facing+g.Angle) * force
@@ -84,9 +83,15 @@ func (g *Gun) Update() {
 
 	if g.MaxChildren > 0 || g.Body.MaxChildren > 0 {
 		var (
-			children float64 = float64(len(g.Body.Children))
-			childCap int     = g.MaxChildren
+			children float64
+			childCap int = g.MaxChildren
 		)
+
+		if childCap > 0 {
+			children = float64(len(g.Children))
+		} else {
+			children = float64(len(g.Body.Children))
+		}
 
 		if g.Calculator == configs.GunCalcNameNecro {
 			children *= sk.Reload
@@ -203,14 +208,12 @@ func (g *Gun) BulletInit(o *Entity) {
 	o.Color = g.Body.Master.Color
 
 	if g.MaxChildren > 0 {
-		o.Parent = gParent(g)
-		g.Children[o.ID] = o
+		o.SetParent(gParent(g))
 	} else if g.Body.MaxChildren > 0 {
-		o.Parent = eParent(g.Body)
-		g.Body.Children[o.ID] = o
+		o.SetParent(eParent(g.Body))
 	}
 
-	o.Source = g.Body
+	o.SetSource(g.Body)
 	o.Facing = o.Velocity.Direction()
 
 	o.RefreshBodyAttributes()
@@ -227,7 +230,7 @@ func (g *Gun) SyncChildren() {
 		skillRaw  *configs.Skills    = g.GetSkillRaw()
 	)
 
-	for _, child := range g.Children {
+	for child := range g.Children {
 		child.Define(&configs.Definition{
 			Body:   interpret,
 			Skills: skillRaw,

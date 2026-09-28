@@ -1,14 +1,14 @@
 package shared
 
 import (
+	"cmp"
 	"math"
 	"math/rand/v2"
 
 	"github.com/z46-dev/gamelib/vector"
-	"golang.org/x/exp/constraints"
 )
 
-func Clamp[T constraints.Ordered](value, _min, _max T) (out T) {
+func Clamp[T cmp.Ordered](value, _min, _max T) (out T) {
 	out = min(_max, max(_min, value))
 	return
 }

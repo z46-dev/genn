@@ -50,19 +50,21 @@ func gParent(g *Gun) (p *Parent) {
 
 func NewEntity(g *Game, pos *vector.Vec2[float64], master *Entity) (e *Entity) {
 	e = &Entity{
-		Game:       g,
-		ID:         g.EntitiesIDAccumulator,
-		Position:   pos,
-		Master:     master,
-		MayCollide: true,
-		Ghost:      false,
+		Game:        g,
+		ID:          g.EntitiesIDAccumulator,
+		Position:    pos,
+		MayCollide:  true,
+		Ghost:       false,
+		SendMessage: func(msg string) {},
 	}
 
-	e.Source = e
 	e.Parent = eParent(e)
 	if master == nil {
-		e.Master = e
+		master = e
 	}
+
+	e.SetMaster(master)
+	e.SetSource(e)
 
 	g.EntitiesIDAccumulator++
 	e.Game.Entities.Add(e)
@@ -79,16 +81,52 @@ func (e *Entity) Define(def *configs.Definition) {
 		e.Index = *def.Index
 	}
 
-	if def.Type != nil {
-		e.Type = *def.Type
+	if def.Name != nil {
+		e.Name = *def.Name
 	}
 
 	if def.Label != nil {
 		e.Label = *def.Label
 	}
 
-	if def.Name != nil {
-		e.Name = *def.Name
+	if def.Type != nil {
+		e.Type = *def.Type
+	}
+
+	if def.Shape != nil {
+		if def.Shape.Circle {
+			e.Shape = nil
+		} else {
+			e.Shape = poly.NewPolygon(def.Shape.Points, e.Position, e.Size, e.Facing)
+		}
+	}
+
+	if def.Color != nil {
+		e.Color = *def.Color
+	}
+
+	if def.Controllers != nil {
+		// TODO
+	}
+
+	if def.MotionType != nil {
+		e.MotionType = *def.MotionType
+	}
+
+	if def.FacingType != nil {
+		e.FacingType = *def.FacingType
+	}
+
+	if def.DrawHealth != nil {
+		e.Settings.DrawHealth = *def.DrawHealth
+	}
+
+	if def.DrawSelf != nil {
+		e.Ghost = *def.DrawSelf
+	}
+
+	if def.PersistsAfterDeath != nil {
+		e.Settings.PersistsAfterDeath = *def.PersistsAfterDeath
 	}
 
 	if def.Guns != nil {
@@ -114,28 +152,11 @@ func (e *Entity) Define(def *configs.Definition) {
 			o.Bind(turretDef.Position, e)
 		}
 	}
-
-	if def.Shape != nil {
-		if def.Shape.Circle {
-			e.Shape = nil
-		} else {
-			e.Shape = poly.NewPolygon(def.Shape.Points, e.Position, e.Size, e.Facing)
-		}
-	}
-
-	if def.Color != nil {
-		e.Color = *def.Color
-	}
-
-	if def.Controllers != nil {
-		// TODO
-	}
-
 }
 
 func (e *Entity) Bind(pos *configs.TurretPosition, master *Entity) {
 	e.Bond = master
-	e.Source = master
+	e.SetSource(master)
 	e.Bond.Turrets = append(e.Bond.Turrets, e)
 	e.Skill = e.Bond.Skill
 	e.Label = e.Bond.Label + " " + e.Label
@@ -326,16 +347,101 @@ func (e *Entity) Kill() {
 	e.Health.Amount = -1
 }
 
-func (e *Entity) Destroy() {
-	e.Game.Entities.Remove(e.ID)
+// SetSource changes the immediate spawner and maintains its reverse index.
+func (e *Entity) SetSource(source *Entity) {
+	if e.Source != nil && e.Source != e {
+		delete(e.Source.SourceDependents, e)
+	}
 
+	e.Source = source
+	if source != nil && source != e {
+		if source.SourceDependents == nil {
+			source.SourceDependents = make(map[*Entity]struct{})
+		}
+
+		source.SourceDependents[e] = struct{}{}
+	}
+}
+
+// SetMaster changes the ultimate owner and maintains its reverse index.
+func (e *Entity) SetMaster(master *Entity) {
+	if e.Master != nil && e.Master != e {
+		delete(e.Master.MasterDependents, e)
+	}
+
+	e.Master = master
+	if master != nil && master != e {
+		if master.MasterDependents == nil {
+			master.MasterDependents = make(map[*Entity]struct{})
+		}
+
+		master.MasterDependents[e] = struct{}{}
+	}
+}
+
+// SetParent changes the child-cap owner and maintains that owner's child set.
+func (e *Entity) SetParent(parent *Parent) {
 	if e.Parent != nil {
 		if e.Parent.IsGun {
-			delete(e.Parent.Gun.Children, e.ID)
+			delete(e.Parent.Gun.Children, e)
 		} else {
-			delete(e.Parent.Entity.Children, e.ID)
+			delete(e.Parent.Entity.Children, e)
 		}
 	}
 
-	// TODO: Reconsider sources, masters, parents, children in relation to entities and whatnot
+	e.Parent = parent
+	if parent != nil {
+		if parent.IsGun {
+			if parent.Gun.Children == nil {
+				parent.Gun.Children = make(map[*Entity]struct{})
+			}
+
+			parent.Gun.Children[e] = struct{}{}
+		} else {
+			if parent.Entity.Children == nil {
+				parent.Entity.Children = make(map[*Entity]struct{})
+			}
+
+			parent.Entity.Children[e] = struct{}{}
+		}
+	}
+}
+
+// Destroy unlinks an entity and cleans up only its directly owned dependents.
+func (e *Entity) Destroy() {
+	e.Game.Entities.Remove(e.ID)
+
+	// Take snapshots because Kill and Destroy can mutate these maps recursively.
+	var sourceDependents []*Entity = make([]*Entity, 0, len(e.SourceDependents))
+	for dependent := range e.SourceDependents {
+		sourceDependents = append(sourceDependents, dependent)
+	}
+
+	for _, dependent := range sourceDependents {
+		if dependent.Settings.PersistsAfterDeath {
+			dependent.SetSource(dependent)
+		} else {
+			dependent.Kill()
+		}
+	}
+
+	var masterDependents []*Entity = make([]*Entity, 0, len(e.MasterDependents))
+	for dependent := range e.MasterDependents {
+		masterDependents = append(masterDependents, dependent)
+	}
+
+	for _, dependent := range masterDependents {
+		dependent.Kill()
+		dependent.SetMaster(dependent)
+	}
+
+	e.SetParent(nil)
+	e.SetSource(nil)
+	e.SetMaster(nil)
+
+	for _, turret := range e.Turrets {
+		turret.Destroy()
+	}
+
+	e.Ghost = true
 }

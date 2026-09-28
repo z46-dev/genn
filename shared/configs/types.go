@@ -75,30 +75,30 @@ type (
 	}
 
 	Definition struct {
-		Index                                                            *DefinitionID
-		Type                                                             *Type
-		Label, Name                                                      *string
-		Parents                                                          []*Definition
-		Guns                                                             *[]*Gun
-		Turrets                                                          *[]*Turret
-		Upgrades                                                         [UpgradeTier_SENTINEL]*[]*Definition
-		Body                                                             *BodyStats
-		AI                                                               *AISettings
-		MotionType                                                       *MotionType
-		FacingType                                                       *FacingType
-		Size, Danger, Value                                              *float64
-		GiveKillMessage, DrawHealth, AcceptsScore, CanGoOutsideRoom      *bool
-		PersistsAfterDeath, CanBeOnLeaderboard, DieAtRange, VariesInSize *bool
-		AdvancedDamage, RatioEffects, HealthWithLevel, Independent       *bool
-		ClearOnMasterUpgrade                                             *bool
-		Color, MaxChildren                                               *int
-		HitsOwnType                                                      *HitsOwnType
-		Shape                                                            *Shape
-		Controllers, NPCControllers                                      *[]Controller
-		StatNames                                                        *StatNames
-		Skills                                                           *Skills
-		SkillCaps                                                        *SkillCaps
-		DamageClass                                                      *DamageClass
+		Index                                                                *DefinitionID
+		Type                                                                 *Type
+		Label, Name                                                          *string
+		Parents                                                              []*Definition
+		Guns                                                                 *[]*Gun
+		Turrets                                                              *[]*Turret
+		Upgrades                                                             [UpgradeTier_SENTINEL]*[]*Definition
+		Body                                                                 *BodyStats
+		AI                                                                   *AISettings
+		MotionType                                                           *MotionType
+		FacingType                                                           *FacingType
+		Size, Danger, Value                                                  *float64
+		GiveKillMessage, DrawHealth, AcceptsScore, CanGoOutsideRoom          *bool
+		PersistsAfterDeath, CanBeOnLeaderboard, DieAtRange, VariesInSize     *bool
+		AdvancedDamage, RatioEffects, HealthWithLevel, Independent, DrawSelf *bool
+		ClearOnMasterUpgrade                                                 *bool
+		Color, MaxChildren                                                   *int
+		HitsOwnType                                                          *HitsOwnType
+		Shape                                                                *Shape
+		Controllers, NPCControllers                                          *[]Controller
+		StatNames                                                            *StatNames
+		Skills                                                               *Skills
+		SkillCaps                                                            *SkillCaps
+		DamageClass                                                          *DamageClass
 	}
 
 	GunPosition struct { // Design of the gun

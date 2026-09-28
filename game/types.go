@@ -92,7 +92,7 @@ type (
 
 	Gun struct {
 		Body, Master                             *Entity
-		Children                                 map[uint64]*Entity
+		Children                                 map[*Entity]struct{}
 		CanShoot, Autofire, WaitToCycle, AltFire bool
 		Length, BaseWidth, EndWidth              float64
 		Offset                                   *vector.Vec2[float64]
@@ -145,24 +145,38 @@ type (
 		Health, Shield                                *HealthType
 		Skill                                         *Skill
 		Invulnerable, MayCollide, Ghost               bool
-		Children                                      map[uint64]*Entity
-		MaxChildren                                   int
-		Control                                       *Control
-		Label                                         string
-		Color                                         int
-		Controllers                                   []*IOController
-		Team                                          int
-		Name                                          string
-		Type                                          configs.Type
-		Shape                                         *poly.Polygon[float64]
-		Bound                                         *EntityBound
-		FacingType                                    configs.FacingType
-		MotionType                                    configs.MotionType
-		Range                                         float64
-		KillCount                                     struct{ Solo, Assists, Bosses int }
-		FiringArc                                     struct{ Start, Width float64 }
-		Settings                                      struct {
-			CanGoOutsideRoom, MayGoInBase bool
+		// Children tracks entities which count against this entity's child cap.
+		Children map[*Entity]struct{}
+		// SourceDependents and MasterDependents are reverse ownership indexes.
+		// They make destruction proportional to an entity's dependents rather
+		// than to every entity in the game.
+		SourceDependents, MasterDependents map[*Entity]struct{}
+		MaxChildren                        int
+		Control                            *Control
+		Label                              string
+		Color                              int
+		Controllers                        []*IOController
+		Team                               int
+		Name                               string
+		Type                               configs.Type
+		Shape                              *poly.Polygon[float64]
+		Bound                              *EntityBound
+		FacingType                         configs.FacingType
+		MotionType                         configs.MotionType
+		Range                              float64
+		SendMessage                        func(msg string)
+		KillCount                          struct{ Solo, Assists, Bosses int }
+		FiringArc                          struct{ Start, Width float64 }
+		Settings                           struct {
+			CanGoOutsideRoom, MayGoInBase, PersistsAfterDeath              bool
+			DrawHealth, DamageEffects, MotionEffects, AcceptsScore         bool
+			GivesKillMessage, DiesAtLowSpeed, DiesAtRange, Independent     bool
+			ClearOnMasterUpgrade, HealthWithLevel, Obstacle, IsNecromancer bool
+			HasNoRecoil, AttentionCraver, BuffVsFood, Leaderboardable      bool
+			ReloadToAcceleration, VariesInSize                             bool
+			DamageClass                                                    configs.DamageClass
+			HitsOwnType                                                    configs.HitsOwnType
+			BroadcastMessage                                               string
 		}
 	}
 

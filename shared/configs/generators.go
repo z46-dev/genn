@@ -279,6 +279,12 @@ func (b *DefBuilder) DamageClass(d DamageClass) (self *DefBuilder) {
 	return
 }
 
+func (b *DefBuilder) DrawSelf(d bool) (self *DefBuilder) {
+	b.Definition.DrawSelf = &d
+	self = b
+	return
+}
+
 func (b *DefBuilder) Build() (out *Definition) {
 	out = b.Definition
 	return
