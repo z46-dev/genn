@@ -45,6 +45,7 @@ const (
 	FacingTypeSmoothWithMotion
 	FacingTypeSmoothWithTarget
 	FacingTypeBound
+	FacingTypeLocksFacing
 )
 
 const (
@@ -199,3 +200,98 @@ const (
 	DamageClassTanks
 	DamageClassObstacles
 )
+
+const (
+	RoomCellTypeNorm     RoomCellType = iota // Normal/Default type, empty from features
+	RoomCellTypeNest                         // Valuable nest/spawn for food/crashers/protectors
+	RoomCellTypeRock                         // Larger rocks, sparse
+	RoomCellTypeRoid                         // Smaller rocks, dense
+	RoomCellTypeWall                         // Wall occupies entire cell
+	RoomCellTypeBas0                         // Team NPC barrier/base
+	RoomCellTypeBas1                         // Team 1 base, spawnpoint
+	RoomCellTypeBap1                         // Team 1 base, spawnpoint, arras base protector inhabits
+	RoomCellTypeBad1                         // Team 1 base, spawnpoint, diep base protector inhabits
+	RoomCellTypeBas2                         // Team 2 base, spawnpoint
+	RoomCellTypeBap2                         // Team 2 base, spawnpoint, arras base protector inhabits
+	RoomCellTypeBad2                         // Team 2 base, spawnpoint, diep base protector inhabits
+	RoomCellTypeBas3                         // Team 3 base, spawnpoint
+	RoomCellTypeBap3                         // Team 3 base, spawnpoint, arras base protector inhabits
+	RoomCellTypeBad3                         // Team 3 base, spawnpoint, diep base protector inhabits
+	RoomCellTypeBas4                         // Team 4 base, spawnpoint
+	RoomCellTypeBap4                         // Team 4 base, spawnpoint, arras base protector inhabits
+	RoomCellTypeBad4                         // Team 4 base, spawnpoint, diep base protector inhabits
+	RoomCellTypeDom0                         // Dominator spawnpoint, NPC/contested team
+	RoomCellTypeDom1                         // Dominator spawnpoint, Team 1
+	RoomCellTypeDom2                         // Dominator spawnpoint, Team 2
+	RoomCellTypeDom3                         // Dominator spawnpoint, Team 3
+	RoomCellTypeDom4                         // Dominator spawnpoint, Team 4
+	RoomCellTypePtl0                         // Portal zone, linked with other ptl0, team agnostic
+	RoomCellTypePtl1                         // Portal zone, linked with other ptl1, team 1
+	RoomCellTypePtl2                         // Portal zone, linked with other ptl2, team 2
+	RoomCellTypePtl3                         // Portal zone, linked with other ptl3, team 3
+	RoomCellTypePtl4                         // Portal zone, linked with other ptl4, team 4
+	RoomCellTypeBarr                         // Barrier, used to separate sections of the map. Pushes people out of it as if it were the edge of the map. Stacks with itself to povide dense borders
+	RoomCellTypeBoss                         // Boss spawnpoint, gamemode specific
+	RoomCellTypeSENTINEL                     // NOT a real room type, invalid. Used as a sentinel for loops
+)
+
+var (
+	// Please follow the naming convention inferred from here
+	// See (package game) > (struct Room) > (func IndexType) for
+	// any string maniupulations that may be done on the names
+	RoomCellTypeNames map[RoomCellType]string = map[RoomCellType]string{
+		RoomCellTypeNorm: "norm",
+		RoomCellTypeNest: "nest",
+		RoomCellTypeRock: "rock",
+		RoomCellTypeRoid: "roid",
+		RoomCellTypeWall: "wall",
+		RoomCellTypeBas0: "bas0",
+		RoomCellTypeBas1: "bas1",
+		RoomCellTypeBap1: "bap1",
+		RoomCellTypeBad1: "bad1",
+		RoomCellTypeBas2: "bas2",
+		RoomCellTypeBap2: "bap2",
+		RoomCellTypeBad2: "bad2",
+		RoomCellTypeBas3: "bas3",
+		RoomCellTypeBap3: "bap3",
+		RoomCellTypeBad3: "bad3",
+		RoomCellTypeBas4: "bas4",
+		RoomCellTypeBap4: "bap4",
+		RoomCellTypeBad4: "bad4",
+		RoomCellTypeDom0: "dom0",
+		RoomCellTypeDom1: "dom1",
+		RoomCellTypeDom2: "dom2",
+		RoomCellTypeDom3: "dom3",
+		RoomCellTypeDom4: "dom4",
+		RoomCellTypePtl0: "ptl0",
+		RoomCellTypePtl1: "ptl1",
+		RoomCellTypePtl2: "ptl2",
+		RoomCellTypePtl3: "ptl3",
+		RoomCellTypePtl4: "ptl4",
+		RoomCellTypeBarr: "barr",
+		RoomCellTypeBoss: "boss",
+	}
+
+	RoomCellTypeIDs map[string]RoomCellType = map[string]RoomCellType{}
+)
+
+func init() {
+	for id := range RoomCellTypeSENTINEL {
+		if name, ok := RoomCellTypeNames[id]; ok {
+			RoomCellTypeIDs[name] = id
+		} else {
+			panic("room cell type " + string(id) + " has no name")
+		}
+	}
+
+	// Ensure that RoomCellTypeNames is unique and has no key outside of the range of (0, RoomCellTypeSENTINEL)
+	for id := range RoomCellTypeNames {
+		if id >= RoomCellTypeSENTINEL {
+			panic("room cell type " + string(id) + " is outside of the range of (0, RoomCellTypeSENTINEL)")
+		}
+	}
+
+	if len(RoomCellTypeNames) != len(RoomCellTypeIDs) {
+		panic("room cell type names are not unique")
+	}
+}

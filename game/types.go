@@ -10,13 +10,53 @@ import (
 
 type (
 	ControllerSetFlags uint8
-	Configuration      struct{}
+
+	Configuration struct {
+		Width          float64    `json:"WIDTH"`
+		Height         float64    `json:"HEIGHT"`
+		Setup          [][]string `json:"ROOM_SETUP"`
+		XGrid          int        `json:"X_GRID"`
+		YGrid          int        `json:"Y_GRID"`
+		GameModeCode   string     `json:"MODE"`
+		SkillBoost     float64    `json:"SKILL_BOOST"`
+		FoodAmount     float64    `json:"FOOD_AMOUNT"`
+		RoomBoundForce float64    `json:"ROOM_BOUND_FORCE"`
+		ParsedGamemode struct {
+			FFA                                               bool
+			Teams                                             int
+			Maze, Domination, Mothership, Tag, Assault, Siege bool
+		} `json:"-"`
+	}
 
 	Game struct {
 		Time                  float64
 		EntitiesIDAccumulator uint64
 		Entities              *gamelib.Collection[*Entity]
 		Collider, Viewer      *hshg.SpatialHash2[*Entity, float64]
+		C                     *Configuration
+		Room                  *Room
+	}
+
+	Room struct {
+		C                                    *Configuration
+		Width, Height, HalfWidth, HalfHeight float64
+		Grid                                 struct{ X, Y int }
+		Scale                                struct{ Square, Linear float64 }
+		Setup                                [][]configs.RoomCellType
+		MaxFood, NestFoodAmount              float64
+		NeedsBroadcast                       bool
+		Zones                                struct {
+			Location [][]*Zone
+			Type     map[configs.RoomCellType][]*Zone
+		}
+	}
+
+	Zone struct {
+		GridX, GridY int
+		Type         configs.RoomCellType
+		*hshg.AABB2[float64]
+		KillZone, Portal bool
+		Team             int
 	}
 
 	HealthType struct {
@@ -97,7 +137,7 @@ type (
 		Parent                                        *Parent
 		Position, Velocity, DeltaV                    *vector.Vec2[float64]
 		AABB                                          *hshg.AABB2[float64]
-		Size, Facing                                  float64
+		Size, Facing, vFacing, StepRemaining          float64
 		Speed, Acceleration, MaxSpeed, TopSpeed, Damp float64
 		Guns                                          []*Gun
 		Turrets                                       []*Entity
@@ -121,6 +161,9 @@ type (
 		Range                                         float64
 		KillCount                                     struct{ Solo, Assists, Bosses int }
 		FiringArc                                     struct{ Start, Width float64 }
+		Settings                                      struct {
+			CanGoOutsideRoom, MayGoInBase bool
+		}
 	}
 
 	Client struct{}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/z46-dev/gamelib/poly"
 	"github.com/z46-dev/gamelib/vector"
+	"github.com/z46-dev/genn/shared"
 	"github.com/z46-dev/genn/shared/configs"
 )
 
@@ -203,7 +204,7 @@ func (e *Entity) Move() {
 		e.Position.X = e.Bond.Position.X + e.Bond.Size*bLen*math.Cos(bDir+e.Bound.Angle+e.Bond.Facing)
 		e.Position.Y = e.Bond.Position.Y + e.Bond.Size*bLen*math.Sin(bDir+e.Bound.Angle+e.Bond.Facing)
 		e.Bond.Velocity.Add(e.DeltaV.Mulled(e.Bound.Size))
-		e.FiringArc.Start, e.FiringArc.Width = e.Bond.Facing+e.Bound.Angle, e.Bound.Arc
+		e.FiringArc.Start, e.FiringArc.Width = e.Bond.Facing+e.Bound.Angle, e.Bound.Arc/2
 		e.DeltaV.Mul(0)
 	}
 
@@ -211,16 +212,107 @@ func (e *Entity) Move() {
 }
 
 func (e *Entity) Face() {
-	// var oldFacing float64 = e.Facing
+	var oldFacing float64 = e.Facing
 
 	switch e.FacingType {
-		
+	case configs.FacingTypeAutospin:
+		e.Facing += 0.02
+	case configs.FacingTypeTurnWithSpeed:
+		e.Facing += e.Velocity.Length() / 90 * math.Pi
+	case configs.FacingTypeTurnWithMotion:
+		e.Facing = e.Velocity.Direction()
+	case configs.FacingTypeSmoothWithMotion:
+		e.Facing += shared.LoopSmooth(e.Facing, e.Velocity.Direction(), 4)
+	case configs.FacingTypeTurnWithTarget:
+		e.Facing = math.Atan2(e.Control.Target.Y, e.Control.Target.X)
+	case configs.FacingTypeLocksFacing:
+		if !e.Control.Alt {
+			e.Facing = math.Atan2(e.Control.Target.Y, e.Control.Target.X)
+		}
+	case configs.FacingTypeSmoothWithTarget:
+		e.Facing += shared.LoopSmooth(e.Facing, math.Atan2(e.Control.Target.Y, e.Control.Target.X), 4)
+	case configs.FacingTypeBound:
+		var givenAngle float64
+		if e.Control.Main {
+			givenAngle = math.Atan2(e.Control.Target.Y, e.Control.Target.X)
+			var diff float64 = shared.AngleDifference(givenAngle, e.FiringArc.Start)
+			if math.Abs(diff) >= e.FiringArc.Width {
+				givenAngle = e.FiringArc.Start
+			}
+		} else {
+			givenAngle = e.FiringArc.Start
+		}
+
+		e.Facing += shared.LoopSmooth(e.Facing, givenAngle, 2) // 4
+	}
+
+	e.vFacing = shared.AngleDifference(oldFacing, e.Facing)
+}
+
+func (e *Entity) Physics() {
+	e.Velocity.Add(e.DeltaV)
+	e.DeltaV.Mul(0)
+
+	e.StepRemaining = 1
+	e.Position.Add(e.Velocity) // could .Mul(e.StepRemaining) like arras did but it was always 1, so no need to waste
+}
+
+func (e *Entity) Friction() {
+	var (
+		motion float64 = e.Velocity.Length()
+		excess float64 = motion - e.MaxSpeed
+	)
+
+	if excess > 0 && e.Damp != 0 {
+		var finalVelocity = e.MaxSpeed + excess/(e.Damp+1)
+		e.Velocity.X = finalVelocity * e.Velocity.X / motion
+		e.Velocity.Y = finalVelocity * e.Velocity.Y / motion
 	}
 }
 
-func (e *Entity) Life() {}
+func (e *Entity) ConfinementToTheseEarthlyShackles() {
+	var loc *Zone = e.Game.Room.Location(e.Position)
 
-func (e *Entity) RefreshBodyAttributes() {}
+	if !e.Settings.CanGoOutsideRoom {
+		e.DeltaV.X -= min(e.Position.X-e.Size+e.Game.Room.HalfWidth+50, 0) * e.Game.C.RoomBoundForce
+		e.DeltaV.X -= max(e.Position.X+e.Size-e.Game.Room.HalfWidth-50, 0) * e.Game.C.RoomBoundForce
+		e.DeltaV.Y -= min(e.Position.Y-e.Size+e.Game.Room.HalfHeight+50, 0) * e.Game.C.RoomBoundForce
+		e.DeltaV.Y -= max(e.Position.Y+e.Size-e.Game.Room.HalfHeight-50, 0) * e.Game.C.RoomBoundForce
+
+		if loc.Type == configs.RoomCellTypeBarr {
+			// Push it out ONLY on the quad side it's on so we don't do some random BS
+			if e.Position.X < loc.X1+e.Size {
+				e.DeltaV.X += e.Game.C.RoomBoundForce
+			} else if e.Position.X > loc.X2-e.Size {
+				e.DeltaV.X -= e.Game.C.RoomBoundForce
+			}
+
+			if e.Position.Y < loc.Y1+e.Size {
+				e.DeltaV.Y += e.Game.C.RoomBoundForce
+			} else if e.Position.Y > loc.Y2-e.Size {
+				e.DeltaV.Y -= e.Game.C.RoomBoundForce
+			}
+		}
+	}
+
+	if !e.Settings.MayGoInBase {
+		if loc != nil && loc.KillZone && e.Team != loc.Team {
+			e.Kill()
+		}
+	}
+}
+
+func (e *Entity) ContemplationOfMortality() {
+	// TODO
+}
+
+func (e *Entity) Life() {
+	// TODO
+}
+
+func (e *Entity) RefreshBodyAttributes() {
+	// TODO
+}
 
 func (e *Entity) UpdateAABB() {
 	var eX, eY float64 = e.Position.X + e.Velocity.X + e.DeltaV.X, e.Position.Y + e.Velocity.Y + e.DeltaV.Y
@@ -230,6 +322,20 @@ func (e *Entity) UpdateAABB() {
 	e.AABB.Y2 = max(e.Position.Y, eY) + e.Size
 }
 
+func (e *Entity) Kill() {
+	e.Health.Amount = -1
+}
+
 func (e *Entity) Destroy() {
 	e.Game.Entities.Remove(e.ID)
+
+	if e.Parent != nil {
+		if e.Parent.IsGun {
+			delete(e.Parent.Gun.Children, e.ID)
+		} else {
+			delete(e.Parent.Entity.Children, e.ID)
+		}
+	}
+
+	// TODO: Reconsider sources, masters, parents, children in relation to entities and whatnot
 }

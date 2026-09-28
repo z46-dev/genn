@@ -17,6 +17,7 @@ type (
 	StatNames    uint8
 	SkillCap     uint8
 	DamageClass  uint8
+	RoomCellType uint8
 
 	Shape struct {
 		Circle bool
